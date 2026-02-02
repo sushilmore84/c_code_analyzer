@@ -1,0 +1,37 @@
+[project]
+name = "claims-business-rule-analyzer"
+version = "0.1.0"
+description = "Business rule extraction from legacy C claims processing systems"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+
+dependencies = [
+    "libclang>=16.0.6",
+    "networkx>=3.2.1",
+    "matplotlib>=3.8.2",
+    "anthropic>=0.25.1",
+    "pandas>=2.1.4",
+    "python-dotenv>=1.0.0",
+    "rich>=13.7.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.3",
+    "black>=23.12.1",
+    "ruff>=0.1.9",
+    "ipython>=8.19.0",
+]
+
+[project.scripts]
+# This creates a 'analyze-claims' command
+analyze-claims = "claims_analyzer.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+# Tell hatchling where your packages are
+[tool.hatch.build.targets.wheel]
+packages = ["src/claims_analyzer"]

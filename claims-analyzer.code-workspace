@@ -1,0 +1,38 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "Python Analyzer"
+    },
+    {
+      "path": "../claims_system",
+      "name": "C Code (to analyze)"
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder:Python Analyzer}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "[python]": {
+      "editor.defaultFormatter": "ms-python.black-formatter",
+      "editor.formatOnSave": true
+    },
+    "[c]": {
+      "editor.formatOnSave": false
+    },
+    "C_Cpp.default.cStandard": "c99",
+    "files.associations": {
+      "*.c": "c",
+      "*.h": "c"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.black-formatter",
+      "charliermarsh.ruff",
+      "ms-vscode.cpptools",
+      "ms-toolsai.jupyter"
+    ]
+  }
+}

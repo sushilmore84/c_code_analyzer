@@ -67,7 +67,7 @@ class RuleModernizer:
     def clean_condition(self, condition: str) -> str:
         """Convert technical condition to business-readable format."""
         if not condition or condition == 'unconditional':
-            return None
+            return None # type: ignore
         
         # Remove C syntax noise
         cleaned = condition.replace('c ->', 'claim.')
@@ -433,7 +433,7 @@ class RuleModernizer:
         impacts = self.extract_impacts(rule)
         
         # Generate description
-        description = self.generate_business_description(rule, conditions, actions)
+        description = self.generate_business_description(rule, conditions, actions) # type: ignore
         
         # Get technical details
         flag_name = rule.get('flags_involved', [None])[0] or ''

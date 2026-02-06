@@ -18,7 +18,7 @@ load_dotenv()
 class BusinessRuleExtractor:
     """Uses LLM to extract business rules from C code"""
     
-    def __init__(self, api_key: str = None):
+    def __init__(self, api_key: str = None): # type: ignore
         """Initialize with Anthropic API key"""
         self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
         if not self.api_key:
@@ -194,7 +194,7 @@ def demo_emergency_premium_rule():
             'name': 'validate_emergency_facility',
             'file': 'claim_validation.c',
             'code': extractor.read_function_code(
-                source_dir / 'claim_validation.c', 
+                source_dir / 'claim_validation.c',  # type: ignore
                 'validate_emergency_facility'
             )
         },
@@ -202,7 +202,7 @@ def demo_emergency_premium_rule():
             'name': 'verify_emergency_procedure',
             'file': 'claim_validation.c',
             'code': extractor.read_function_code(
-                source_dir / 'claim_validation.c',
+                source_dir / 'claim_validation.c', # type: ignore
                 'verify_emergency_procedure'
             )
         },
@@ -210,7 +210,7 @@ def demo_emergency_premium_rule():
             'name': 'is_provider_in_network',
             'file': 'network_verification.c',
             'code': extractor.read_function_code(
-                source_dir / 'network_verification.c',
+                source_dir / 'network_verification.c', # type: ignore
                 'is_provider_in_network'
             )
         },
@@ -218,7 +218,7 @@ def demo_emergency_premium_rule():
             'name': 'apply_emergency_premium',
             'file': 'cos_calculation.c',
             'code': extractor.read_function_code(
-                source_dir / 'cos_calculation.c',
+                source_dir / 'cos_calculation.c', # type: ignore
                 'apply_emergency_premium'
             )
         }

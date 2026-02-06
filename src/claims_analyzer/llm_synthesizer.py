@@ -11,6 +11,8 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 import anthropic
 
+from claims_analyzer.llm_client import LLMClient
+
 
 @dataclass
 class DMNCondition:
@@ -140,23 +142,20 @@ Generate the DMN table now:"""
         return prompt
     
     def call_claude(self, prompt: str) -> str:
-        """Call Claude API to generate DMN table."""
+        """Call LLM API to generate DMN table."""
         
-        print("🤖 Calling Claude API...")
+        print("🤖 Calling LLM API...")
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=4000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+       
+        llm = LLMClient()
+        llm_client = llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
         
         # Extract text from response
-        result = response.content[0].text
+        result = llm_client["text"]
         
         return result
     

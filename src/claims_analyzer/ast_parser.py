@@ -230,7 +230,7 @@ class EnhancedClaimsParser:
         constants = []
         
         for token in tokens:
-            if token.kind == clang.TokenKind.IDENTIFIER and token.spelling not in keywords:
+            if token.kind == clang.TokenKind.IDENTIFIER and token.spelling not in keywords: # type: ignore
                 if '->' in ' '.join(t.spelling for t in tokens):
                     # Try to capture struct field access
                     idx = tokens.index(token)
@@ -247,7 +247,7 @@ class EnhancedClaimsParser:
             elif token.spelling in ['>', '<', '==', '!=', '>=', '<=', '&&', '||']:
                 operators.append(token.spelling)
             
-            elif token.kind == clang.TokenKind.LITERAL:
+            elif token.kind == clang.TokenKind.LITERAL: # type: ignore
                 constants.append(token.spelling)
         
         return ConditionInfo(
@@ -263,15 +263,15 @@ class EnhancedClaimsParser:
         conditions = []
         
         for child in node.walk_preorder():
-            if child.kind == clang.CursorKind.IF_STMT:
+            if child.kind == clang.CursorKind.IF_STMT: # type: ignore
                 # First child is usually the condition
                 for subchild in child.get_children():
-                    if subchild.kind != clang.CursorKind.COMPOUND_STMT:
+                    if subchild.kind != clang.CursorKind.COMPOUND_STMT: # type: ignore
                         condition = self.extract_condition_expression(subchild)
                         conditions.append(condition)
                         break
             
-            elif child.kind == clang.CursorKind.WHILE_STMT:
+            elif child.kind == clang.CursorKind.WHILE_STMT: # type: ignore
                 # First child is the condition
                 for subchild in child.get_children():
                     condition = self.extract_condition_expression(subchild)
@@ -290,11 +290,11 @@ class EnhancedClaimsParser:
         
         for child in node.walk_preorder():
             # Detect if we're in a condition
-            if child.kind in [clang.CursorKind.IF_STMT, clang.CursorKind.WHILE_STMT]:
+            if child.kind in [clang.CursorKind.IF_STMT, clang.CursorKind.WHILE_STMT]: # type: ignore
                 in_condition = True
             
             # Look for member access (e.g., c->amount, provider->status)
-            if child.kind == clang.CursorKind.MEMBER_REF_EXPR:
+            if child.kind == clang.CursorKind.MEMBER_REF_EXPR: # type: ignore
                 tokens = list(child.get_tokens())
                 if len(tokens) >= 3:  # object, ->, field
                     field_access = f"{tokens[0].spelling}->{tokens[2].spelling}"
@@ -308,8 +308,8 @@ class EnhancedClaimsParser:
                     if parent is not None:
                         try:
                             for sibling in parent.get_children():
-                                if sibling.kind in [clang.CursorKind.BINARY_OPERATOR, 
-                                                   clang.CursorKind.COMPOUND_ASSIGNMENT_OPERATOR]:
+                                if sibling.kind in [clang.CursorKind.BINARY_OPERATOR,  # type: ignore
+                                                   clang.CursorKind.COMPOUND_ASSIGNMENT_OPERATOR]: # type: ignore
                                     # Check if our node is on the left
                                     children = list(sibling.get_children())
                                     if children and children[0] == child:
@@ -338,7 +338,7 @@ class EnhancedClaimsParser:
         returns = []
         
         for child in node.walk_preorder():
-            if child.kind == clang.CursorKind.RETURN_STMT:
+            if child.kind == clang.CursorKind.RETURN_STMT: # type: ignore
                 tokens = list(child.get_tokens())
                 
                 if len(tokens) > 1:  # Has a return value
@@ -366,16 +366,16 @@ class EnhancedClaimsParser:
         
         for child in node.walk_preorder():
             # Track current condition context
-            if child.kind == clang.CursorKind.IF_STMT:
+            if child.kind == clang.CursorKind.IF_STMT: # type: ignore
                 # Get condition
                 for subchild in child.get_children():
-                    if subchild.kind != clang.CursorKind.COMPOUND_STMT:
+                    if subchild.kind != clang.CursorKind.COMPOUND_STMT: # type: ignore
                         tokens = list(subchild.get_tokens())
                         current_condition = ' '.join(t.spelling for t in tokens)
                         break
             
             # Look for flag setting
-            if child.kind == clang.CursorKind.COMPOUND_ASSIGNMENT_OPERATOR:
+            if child.kind == clang.CursorKind.COMPOUND_ASSIGNMENT_OPERATOR: # type: ignore
                 tokens = list(child.get_tokens())
                 for token in tokens:
                     if 'FLAG_' in token.spelling:
@@ -383,7 +383,7 @@ class EnhancedClaimsParser:
                         self.all_flags.add(token.spelling)
             
             # Look for flag checking
-            if child.kind == clang.CursorKind.BINARY_OPERATOR:
+            if child.kind == clang.CursorKind.BINARY_OPERATOR: # type: ignore
                 tokens = list(child.get_tokens())
                 for token in tokens:
                     if 'FLAG_' in token.spelling:
@@ -399,7 +399,7 @@ class EnhancedClaimsParser:
         # Basic info
         params = []
         for child in node.get_children():
-            if child.kind == clang.CursorKind.PARM_DECL:
+            if child.kind == clang.CursorKind.PARM_DECL: # type: ignore
                 params.append(f"{child.type.spelling} {child.spelling}")
         
         # Flag operations with conditions
@@ -417,9 +417,9 @@ class EnhancedClaimsParser:
         # Function calls
         calls = []
         for child in node.walk_preorder():
-            if child.kind == clang.CursorKind.CALL_EXPR:
+            if child.kind == clang.CursorKind.CALL_EXPR: # type: ignore
                 for token in child.get_tokens():
-                    if token.kind == clang.TokenKind.IDENTIFIER:
+                    if token.kind == clang.TokenKind.IDENTIFIER: # type: ignore
                         func_name = token.spelling
                         calls.append(func_name)
                         # Build call graph
@@ -560,7 +560,7 @@ class EnhancedClaimsParser:
                 continue
             
             for node in tu.cursor.walk_preorder():
-                if node.kind == clang.CursorKind.FUNCTION_DECL and node.is_definition():
+                if node.kind == clang.CursorKind.FUNCTION_DECL and node.is_definition(): # type: ignore
                     func_info = self.analyze_function_enhanced(node)
                     self.functions.append(func_info)
         

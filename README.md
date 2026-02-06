@@ -31,3 +31,45 @@ uv run ruff check src/
 ```
 
 ## Project Structure
+
+## LLM Related
+openai - gpt-4o-mini-2024-07-18
+anthropic - claude-sonnet-4-20250514
+
+## Execution Flow 
+
+# Run all 5 stages
+cd /path/to/claims-analyzer
+
+# Stage 1
+uv run python src/claims_analyzer/ast_parser.py ../claims_system
+
+# Stage 2
+uv run python src/claims_analyzer/graph_builder.py output/enhanced_analysis.json
+
+# Stage 3
+uv run python src/claims_analyzer/rule_modernizer.py output/graph_analysis_for_llm.json
+
+# Stage 4
+uv run python src/claims_analyzer/llm_synthesizer.py output/modernized_emergency_rule.json
+
+# Stage 5
+uv run python src/claims_analyzer/llm_markdown_doc_generator.py
+
+## 📋 Checklist Format
+# Stage 1: AST Parser
+  Command: uv run python src/claims_analyzer/ast_parser.py ../claims_system
+  Output: output/enhanced_analysis.json
+  
+# Stage 2: Graph Builder
+  Command: uv run python src/claims_analyzer/graph_builder.py output/enhanced_analysis.json
+  Output: output/graph_analysis_for_llm.json + 3 PNG files
+  
+# Stage 3: Rule Modernizer
+  Command: uv run python src/claims_analyzer/rule_modernizer.py output/graph_analysis_for_llm.json
+  Output: output/modernized_emergency_rule.json + MD file
+  
+# Stage 4: LLM Synthesizer (requires API key)
+  Command: uv run python src/claims_analyzer/llm_synthesizer.py output/modernized_emergency_rule.json
+  Output: output/dmn_emergency_rule.json + MD + HTML
+

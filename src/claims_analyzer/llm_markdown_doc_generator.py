@@ -14,6 +14,8 @@ from datetime import datetime
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+from claims_analyzer.llm_client import LLMClient
+
 # Load environment variables
 load_dotenv()
 
@@ -27,9 +29,9 @@ class RuleDocumentation:
     # LLM-generated business perspective
     executive_summary: str
     business_description: str
-    business_value: str
-    business_rationale: str
-    business_examples: List[Dict]
+    # business_value: str
+    # business_rationale: str
+    # business_examples: List[Dict]
     
     # LLM-generated detailed specification
     conditions_plain_english: List[str]
@@ -41,8 +43,8 @@ class RuleDocumentation:
     related_rules: List[str]
     upstream_dependencies: List[str]
     downstream_impacts: List[str]
-    potential_risks: List[str]
-    compliance_considerations: List[str]
+    # potential_risks: List[str]
+    # compliance_considerations: List[str]
     
     # Metadata
     rule_category: str
@@ -65,16 +67,7 @@ class MarkdownDocGenerator:
     
     def __init__(self, modernized_rules_file: str, graph_analysis_file: str):
         """Initialize with modernized rules and graph analysis."""
-        
-        # Check for API key
-        self.api_key = os.getenv('ANTHROPIC_API_KEY')
-        if not self.api_key:
-            raise ValueError(
-                "ANTHROPIC_API_KEY not found. Please set it in .env file or environment.\n"
-                "Get your API key from: https://console.anthropic.com/"
-            )
-        
-        self.client = Anthropic(api_key=self.api_key)
+        self.llm = LLMClient()
         
         # Load modernized rules
         with open(modernized_rules_file) as f:
@@ -114,13 +107,17 @@ Actions: {json.dumps(rule.get('actions_then', []), indent=2)}
 Generate ONLY the executive summary text (2-3 sentences). Do not include any preamble or explanation.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=500,
-            messages=[{"role": "user", "content": prompt}]
+        
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
         
-        return response.content[0].text.strip()
+        # Extract text from response
+        result = llm_client["text"]
+        
+        return result.strip()
     
     def generate_business_value(self, rule: Dict) -> str:
         """Use LLM to generate business value analysis."""
@@ -155,13 +152,16 @@ Format your response as markdown with clear headers:
 Be specific and realistic. For financial estimates, use placeholder format like "$X million" or "XX%" if exact numbers aren't known.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=800,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
         
-        return response.content[0].text.strip()
+        # Extract text from response
+        result = llm_client["text"]
+        
+        return result.strip()
     
     def generate_business_rationale(self, rule: Dict) -> str:
         """Use LLM to explain why this rule exists."""
@@ -182,13 +182,16 @@ Actions: {json.dumps(rule.get('actions_then', []), indent=2)}
 Provide a clear, concise explanation (2-3 paragraphs) that a non-technical business stakeholder would understand.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
         
-        return response.content[0].text.strip()
+        # Extract text from response
+        result = llm_client["text"]
+        
+        return result.strip()
     
     def generate_plain_english_conditions(self, rule: Dict) -> List[str]:
         """Use LLM to convert conditions to plain English."""
@@ -229,15 +232,18 @@ Example format:
 Return ONLY the JSON array, nothing else.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('[')
             end = result_text.rfind(']') + 1
             if start >= 0 and end > start:
@@ -279,15 +285,18 @@ Example format:
 Return ONLY the JSON array, nothing else.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('[')
             end = result_text.rfind(']') + 1
             if start >= 0 and end > start:
@@ -328,13 +337,16 @@ Write a narrative explanation (2-3 paragraphs) using markdown formatting with he
 Keep it concise and business-focused.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
         
-        return response.content[0].text.strip()
+        # Extract text from response
+        result = llm_client["text"]
+        
+        return result.strip()
     
     def generate_execution_flow(self, rule: Dict) -> List[str]:
         """Use LLM to generate step-by-step execution flow."""
@@ -364,15 +376,18 @@ Example:
 Typically 4-6 steps. Return ONLY the JSON array.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=700,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('[')
             end = result_text.rfind(']') + 1
             if start >= 0 and end > start:
@@ -441,15 +456,18 @@ Example format:
 Return ONLY the JSON array with 2-3 examples.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=2000,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('[')
             end = result_text.rfind(']') + 1
             if start >= 0 and end > start:
@@ -504,15 +522,18 @@ Example:
 Return ONLY the JSON array with 3-5 related rules.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=600,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('[')
             end = result_text.rfind(']') + 1
             if start >= 0 and end > start:
@@ -555,15 +576,18 @@ Focus on realistic healthcare industry risks and compliance requirements (HIPAA,
 Return ONLY the JSON object.
 """
         
-        response = self.client.messages.create(
-            model="claude-sonnet-4-20250514",
-            max_tokens=800,
-            messages=[{"role": "user", "content": prompt}]
+        llm_client = self.llm.call_llm(
+            provider="openai",
+            model="gpt-4o-mini-2024-07-18",
+            prompt=prompt
         )
+        
+        # Extract text from response
+        result = llm_client["text"]
         
         # Parse JSON response
         try:
-            result_text = response.content[0].text.strip()
+            result_text = result.strip()
             start = result_text.find('{')
             end = result_text.rfind('}') + 1
             if start >= 0 and end > start:
@@ -585,11 +609,11 @@ Return ONLY the JSON object.
         print("   📝 Executive summary...")
         exec_summary = self.generate_executive_summary(rule)
         
-        print("   💰 Business value...")
-        business_value = self.generate_business_value(rule)
+        # print("   💰 Business value...")
+        # business_value = self.generate_business_value(rule)
         
-        print("   🎯 Business rationale...")
-        business_rationale = self.generate_business_rationale(rule)
+        # print("   🎯 Business rationale...")
+        # business_rationale = self.generate_business_rationale(rule)
         
         print("   ✅ Plain English conditions...")
         plain_conditions = self.generate_plain_english_conditions(rule)
@@ -603,14 +627,14 @@ Return ONLY the JSON object.
         print("   🔄 Execution flow...")
         execution_flow = self.generate_execution_flow(rule)
         
-        print("   📋 Business examples...")
-        examples = self.generate_business_examples(rule)
+        # print("   📋 Business examples...")
+        # examples = self.generate_business_examples(rule)
         
         print("   🔗 Related rules...")
         related_rules = self.identify_related_rules(rule)
         
-        print("   ⚠️  Risks and compliance...")
-        risks, compliance = self.identify_risks_and_compliance(rule)
+        # print("   ⚠️  Risks and compliance...")
+        # risks, compliance = self.identify_risks_and_compliance(rule)
         
         # Get dependencies from existing data
         upstream = rule.get('triggers', [])
@@ -635,9 +659,9 @@ Return ONLY the JSON object.
             rule_name=rule.get('rule_name', ''),
             executive_summary=exec_summary,
             business_description=rule.get('business_description', ''),
-            business_value=business_value,
-            business_rationale=business_rationale,
-            business_examples=examples,
+            # business_value=business_value,
+            # business_rationale=business_rationale,
+            # business_examples=examples,
             conditions_plain_english=plain_conditions,
             actions_plain_english=plain_actions,
             decision_logic=decision_logic,
@@ -645,8 +669,8 @@ Return ONLY the JSON object.
             related_rules=related_rules,
             upstream_dependencies=upstream,
             downstream_impacts=downstream,
-            potential_risks=risks,
-            compliance_considerations=compliance,
+            # potential_risks=risks,
+            # compliance_considerations=compliance,
             rule_category=rule.get('rule_category', ''),
             business_domains=rule.get('business_domain', []),
             execution_phases=rule.get('execution_phase', []),
@@ -706,20 +730,20 @@ Return ONLY the JSON object.
         md.append("")
         
         # Business Value
-        md.append("## Business Value")
-        md.append("")
-        md.append(doc.business_value)
-        md.append("")
-        md.append("---")
-        md.append("")
+        # md.append("## Business Value")
+        # md.append("")
+        # md.append(doc.business_value)
+        # md.append("")
+        # md.append("---")
+        # md.append("")
         
         # Business Rationale
-        md.append("## Business Rationale")
-        md.append("")
-        md.append(doc.business_rationale)
-        md.append("")
-        md.append("---")
-        md.append("")
+        # md.append("## Business Rationale")
+        # md.append("")
+        # md.append(doc.business_rationale)
+        # md.append("")
+        # md.append("---")
+        # md.append("")
         
         # Rule Logic
         md.append("## Rule Logic")
@@ -754,45 +778,45 @@ Return ONLY the JSON object.
         md.append("")
         
         # Business Examples
-        md.append("## Business Examples")
-        md.append("")
+        # md.append("## Business Examples")
+        # md.append("")
         
-        for i, example in enumerate(doc.business_examples, 1):
-            md.append(f"### Example {i}: {example.get('scenario', 'Scenario')}")
-            md.append("")
+        # for i, example in enumerate(doc.business_examples, 1):
+        #     md.append(f"### Example {i}: {example.get('scenario', 'Scenario')}")
+        #     md.append("")
             
-            # Input
-            if 'input' in example and example['input']:
-                md.append("#### Input")
-                md.append("")
-                for key, value in example['input'].items():
-                    md.append(f"- **{key}:** {value}")
-                md.append("")
+        #     # Input
+        #     if 'input' in example and example['input']:
+        #         md.append("#### Input")
+        #         md.append("")
+        #         for key, value in example['input'].items():
+        #             md.append(f"- **{key}:** {value}")
+        #         md.append("")
             
-            # Rule Evaluation
-            if 'rule_evaluation' in example:
-                md.append("#### Rule Evaluation")
-                md.append("")
-                md.append(example['rule_evaluation'])
-                md.append("")
+        #     # Rule Evaluation
+        #     if 'rule_evaluation' in example:
+        #         md.append("#### Rule Evaluation")
+        #         md.append("")
+        #         md.append(example['rule_evaluation'])
+        #         md.append("")
             
-            # Outcome
-            if 'outcome' in example and example['outcome']:
-                md.append("#### Outcome")
-                md.append("")
-                for key, value in example['outcome'].items():
-                    md.append(f"- **{key}:** {value}")
-                md.append("")
+        #     # Outcome
+        #     if 'outcome' in example and example['outcome']:
+        #         md.append("#### Outcome")
+        #         md.append("")
+        #         for key, value in example['outcome'].items():
+        #             md.append(f"- **{key}:** {value}")
+        #         md.append("")
             
-            # Business Rationale
-            if 'business_rationale' in example:
-                md.append("#### Business Rationale")
-                md.append("")
-                md.append(example['business_rationale'])
-                md.append("")
+        #     # Business Rationale
+        #     if 'business_rationale' in example:
+        #         md.append("#### Business Rationale")
+        #         md.append("")
+        #         md.append(example['business_rationale'])
+        #         md.append("")
         
-        md.append("---")
-        md.append("")
+        # md.append("---")
+        # md.append("")
         
         # Related Rules
         if doc.related_rules:
@@ -830,26 +854,26 @@ Return ONLY the JSON object.
         md.append("")
         
         # Risk and Compliance
-        if doc.potential_risks or doc.compliance_considerations:
-            md.append("## Risk and Compliance")
-            md.append("")
+        # if doc.potential_risks or doc.compliance_considerations:
+        #     md.append("## Risk and Compliance")
+        #     md.append("")
             
-            if doc.potential_risks:
-                md.append("### Potential Risks")
-                md.append("")
-                for risk in doc.potential_risks:
-                    md.append(f"- {risk}")
-                md.append("")
+        #     if doc.potential_risks:
+        #         md.append("### Potential Risks")
+        #         md.append("")
+        #         for risk in doc.potential_risks:
+        #             md.append(f"- {risk}")
+        #         md.append("")
             
-            if doc.compliance_considerations:
-                md.append("### Compliance Considerations")
-                md.append("")
-                for compliance in doc.compliance_considerations:
-                    md.append(f"- {compliance}")
-                md.append("")
+        #     if doc.compliance_considerations:
+        #         md.append("### Compliance Considerations")
+        #         md.append("")
+        #         for compliance in doc.compliance_considerations:
+        #             md.append(f"- {compliance}")
+        #         md.append("")
             
-            md.append("---")
-            md.append("")
+        #     md.append("---")
+        #     md.append("")
         
         # Technical Reference
         md.append("## Technical Reference")
@@ -955,7 +979,7 @@ def main():
     print("  ✅ Related rules")
     print("  ✅ Risk and compliance analysis")
     print("\n📝 Output format: Professional Markdown documents")
-    print("   No npm, Node.js, or docx dependencies needed!")
+   
 
 
 if __name__ == '__main__':

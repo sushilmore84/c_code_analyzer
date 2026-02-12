@@ -404,7 +404,7 @@ def main():
     
     # Initialize synthesizer
     try:
-        synthesizer = LLMSynthesizer("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")
+        synthesizer = LLMSynthesizer()
     except ValueError as e:
         print(f"\n❌ Error: {e}")
         print("\n💡 Set your API key:")

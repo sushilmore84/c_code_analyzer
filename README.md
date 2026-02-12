@@ -14,6 +14,11 @@ cp .env.template .env
 
 ## Usage
 ```bash
+
+# In Mac If you already have .venv file
+uv venv
+source .venv/bin/activate
+
 # Analyze C codebase
 uv run python src/claims_analyzer/ast_parser.py ../claims_system
 
